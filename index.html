@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeepMuzix – Feel the Lyrics. Feel the Music.</title>
+  <meta name="description" content="Modern Tamil song-lyrics hub with karaoke, search, share and favourites.">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0b0c10;--surface:#1f2833;--primary:#66fcf1;--text:#c5c6c7;--heading:#ffffff;--font-tamil:'Noto Sans Tamil',sans-serif;--base-fs:1.05rem;--line-h:1.6;}
+    .light{--bg:#f5f5f5;--surface:#ffffff;--primary:#00838f;--text:#212121;--heading:#000;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font-tamil);background:var(--bg);color:var(--text);font-size:var(--base-fs);line-height:var(--line-h);transition:background .3s,color .3s;}
+    button{cursor:pointer;border:none;background:var(--primary);color:var(--bg);padding:.4rem .8rem;border-radius:4px;font-weight:700;}
+    button:hover{opacity:.9;}
+    .top-bar{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem;background:var(--surface);}
+    .logo{font-size:1.4rem;font-weight:700;color:var(--primary);}
+    .controls{display:flex;gap:.5rem;}
+    .hero{text-align:center;padding:2rem 1rem 1.5rem;}
+    .tagline{font-size:1.5rem;color:var(--heading);margin-bottom:1rem;}
+    #searchBar{width:100%;max-width:500px;padding:.6rem 1rem;border:1px solid var(--primary);border-radius:25px;background:transparent;color:var(--text);font-size:1rem;}
+    .folder-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;padding:1rem;}
+    .folder{background:var(--surface);border:2px solid var(--primary);border-radius:12px;padding:2rem 1rem;text-align:center;cursor:pointer;transition:transform .2s,box-shadow .2s;}
+    .folder:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+    .folder-icon{font-size:3rem;margin-bottom:.5rem;}
+    .folder-name{font-size:1.3rem;font-weight:700;color:var(--heading);}
+    .list-view,.lyrics-view{max-width:800px;margin:0 auto;padding:1rem;}
+    .list-header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;}
+    .list-item{background:var(--surface);border-left:4px solid var(--primary);padding:.75rem 1rem;margin-bottom:.5rem;border-radius:4px;cursor:pointer;transition:background .2s;}
+    .list-item:hover{background:rgba(255,255,255,.05);}
+    .list-item h4{color:var(--heading);margin-bottom:.2rem;}
+    .list-item p{font-size:.85rem;opacity:.8;}
+    .song-img{width:140px;height:140px;border-radius:8px;margin:0 auto 1rem;display:block;object-fit:cover;border:2px solid var(--primary);}
+    .lyrics-header{text-align:center;margin-bottom:1rem;}
+    .lang-switch{margin-bottom:1rem;text-align:center;}
+    .lang-switch button{margin:0 .25rem;}
+    #lyricsText{white-space:pre-wrap;background:var(--surface);padding:1rem;border-radius:6px;font-family:var(--font-tamil);}
+    .karaoke#lyricsText{line-height:2.2;}
+    .lyrics-tools{display:flex;gap:1rem;align-items:center;justify-content:space-between;margin-top:1rem;flex-wrap:wrap;}
+    .extra-meta{text-align:center;font-size:.9rem;opacity:.8;margin-bottom:1rem;}
+    .meaning{background:var(--surface);border-left:4px solid var(--primary);padding:1rem;margin:1rem 0;border-radius:4px;}
+    .meaning h3{margin-bottom:.5rem;color:var(--primary);}
+    .karaoke-line{display:block;transition:background .3s;}
+    .karaoke-line.active{background:rgba(102,252,241,.25);border-radius:3px;padding:0 4px;}
+    .fav-btn{background:transparent;border:2px solid var(--primary);color:var(--primary);margin-left:auto;}
+    .fav-btn.faved{background:var(--primary);color:var(--bg);}
+    .share-buttons{display:flex;gap:.5rem;justify-content:center;margin-top:1rem;}
+    .share-buttons button{background:var(--surface);border:1px solid var(--primary);color:var(--primary);}
+    footer{text-align:center;padding:1.5rem 1rem;font-size:.85rem;border-top:1px solid var(--surface);margin-top:2rem;}
+    .social span{margin:0 .4rem;font-weight:700;}
+    .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(200%);background:var(--primary);color:var(--bg);padding:.5rem 1rem;border-radius:4px;font-weight:700;transition:transform .3s;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    .hidden{display:none;}
+  </style>
+</head>
+
+<body>
+  <header class="top-bar">
+    <div class="logo">DeepMuzix</div>
+    <div class="controls">
+      <button id="fontPlus">A+</button>
+      <button id="fontMinus">A-</button>
+      <button id="themeToggle">??</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1 class="tagline">Feel the Lyrics. Feel the Music.</h1>
+    <input type="search" id="searchBar" placeholder="Search song, movie, singer… (Tamil or English)" aria-label="Search">
+  </section>
+
+  <!-- ==========  HOME  ========== -->
+  <div id="homeView" class="folder-grid">
+    <div class="folder" data-folder="movies"><div class="folder-icon">??</div><div class="folder-name">Movies</div></div>
+    <div class="folder" data-folder="music"><div class="folder-icon">??</div><div class="folder-name">Music Directors</div></div>
+    <div class="folder" data-folder="years"><div class="folder-icon">??</div><div class="folder-name">Years</div></div>
+    <div class="folder" data-folder="popular"><div class="folder-icon">??</div><div class="folder-name">Popular</div></div>
+  </div>
+
+  <!-- ==========  LIST VIEW  ========== -->
+  <div id="listView" class="list-view hidden">
+    <div class="list-header"><button id="listBackBtn">? Back</button><h2 id="listTitle"></h2></div>
+    <div id="listContent"></div>
+  </div>
+
+  <!-- ==========  LYRICS VIEW  ========== -->
+  <article id="lyricsView" class="lyrics-view hidden">
+    <div class="lyrics-header">
+      <img id="songImg" class="song-img" src="" alt="Song image" loading="lazy">
+      <h2 id="lyricsTitle"></h2>
+      <p id="lyricsMeta"></p>
+      <div class="extra-meta" id="extraMeta"></div>
+      <div class="lang-switch"><button id="tamilBtn" class="active">?????</button><button id="englishBtn">Tanglish</button></div>
+    </div>
+    <pre id="lyricsText" class="tamil"></pre>
+    <div class="meaning" id="meaningBox"></div>
+    <div class="lyrics-tools">
+      <label><input type="checkbox" id="karaokeMode"> Karaoke mode (auto-scroll)</label>
+      <button id="copyBtn">Copy Lyrics</button>
+      <button id="favBtn" class="fav-btn">? Favourite</button>
+    </div>
+    <div class="share-buttons">
+      <button id="waShare">Share to WhatsApp</button>
+      <button id="fbShare">Share to Facebook</button>
+      <button id="copyLink">Copy Link</button>
+    </div>
+    <div id="karaokePlayer" style="margin-top:1rem;"></div>
+  </article>
+
+  <div id="toast" class="toast">Copied!</div>
+
+  <footer>
+    <p>© 2026 DeepMuzix – Lyrics for educational & personal use only. All credits to original creators.</p>
+    <div class="social"><span>f</span><span>t</span><span>i</span></div>
+  </footer>
+
+  <script>
+    /* ---------- Data (with extra fields) ---------- */
+    const songs=[
+      {
+        id:1,
+        title:{ta:"?????? ??",en:"Munbe Vaa"},
+        movie:{ta:"OK ??????",en:"OK Kanmani"},
+        singer:{ta:"???? ????????",en:"Sid Sriram"},
+        music:{ta:"A. R. ???????",en:"A. R. Rahman"},
+        lyricist:{ta:"?????????",en:"Vairamuthu"},
+        year:2015,
+        genre:"Romantic",
+        meaning:"A breezy romantic plea inviting the beloved to come closer.",
+        img:"https://i.ytimg.com/vi/Y8CYlrTap6M/hqdefault.jpg",
+        karaoke:"https://www.youtube.com/embed/Y8CYlrTap6M",
+        lyrics:{
+          ta:`?????? ?? ?????? ??
+??????? ????? ?????????
+??????? ??????? ?????????
+??? ??? ???? ???????? ??????????`,
+          en:`Munbe vaa munbe vaa
+Nenjam kondu ninaivugal
+Mazhaiyil nanaiyum ninaivugal
+Avai en manadhai thottu chelgindrana`
+        },
+        views:0
+      },
+      {
+        id:2,
+        title:{ta:"????? ?????",en:"Uyire Uyire"},
+        movie:{ta:"?????",en:"Thalapathy"},
+        singer:{ta:"???. ??. ????????????????",en:"S. P. Balasubrahmanyam"},
+        music:{ta:"????????",en:"Ilaiyaraaja"},
+        lyricist:{ta:"?????????",en:"Vairamuthu"},
+        year:1991,
+        genre:"Melody",
+        meaning:"A soul-stirring expression of love comparing the beloved to life itself.",
+        img:"https://i.ytimg.com/vi/7wKRgscXaK0/hqdefault.jpg",
+        karaoke:"https://www.youtube.com/embed/7wKRgscXaK0",
+        lyrics:{
+          ta:`????? ?????
+??? ?????????? ??? ?????
+????? ???? ???????? ????
+??? ????? ??? ?????????`,
+          en:`Uyire uyire
+Un paarvaiyil oru vaanam
+Adhil naan parakkum paravai
+Un kural en isaiyaagum`
+        },
+        views:0
+      }
+    ];
+
+    /* ---------- DOM ---------- */
+    const homeView   = document.getElementById('homeView');
+    const listView   = document.getElementById('listView');
+    const lyricsView = document.getElementById('lyricsView');
+    const searchBar  = document.getElementById('searchBar');
+    const listBackBtn= document.getElementById('listBackBtn');
+    const listTitle  = document.getElementById('listTitle');
+    const listContent= document.getElementById('listContent');
+    const backBtn    = document.getElementById('listBackBtn');
+    const copyBtn    = document.getElementById('copyBtn');
+    const karaokeChk = document.getElementById('karaokeMode');
+    const lyricsText = document.getElementById('lyricsText');
+    const toast      = document.getElementById('toast');
+    const themeBtn   = document.getElementById('themeToggle');
+    const fontPlus   = document.getElementById('fontPlus');
+    const fontMinus  = document.getElementById('fontMinus');
+    const tamilBtn   = document.getElementById('tamilBtn');
+    const englishBtn = document.getElementById('englishBtn');
+    const songImg    = document.getElementById('songImg');
+    const meaningBox = document.getElementById('meaningBox');
+    const favBtn     = document.getElementById('favBtn');
+    const karaokePlayer=document.getElementById('karaokePlayer');
+
+    let currentLang = 'ta';
+    let currentSong = null;
+    let currentList = null;
+    let karaokeInterval=null;
+
+    const hideAll=()=>[homeView,listView,lyricsView].forEach(v=>v.classList.add('hidden'));
+    const show=(v)=>{ hideAll(); v.classList.remove('hidden'); };
+
+    /* ---------- Popular Sort ---------- */
+    function getPopular(){
+      return [...songs].sort((a,b)=>b.views-a.views);
+    }
+
+    /* ---------- Home Folder Clicks ---------- */
+    homeView.addEventListener('click',e=>{
+      const folder=e.target.closest('.folder');
+      if(!folder) return;
+      const type=folder.dataset.folder;
+      if(type==='movies') showMovieList();
+      if(type==='music')  showMusicList();
+      if(type==='years')  showYearList();
+      if(type==='popular')showPopularList();
+    });
+
+    /* ---------- Build Lists ---------- */
+    function showMovieList(){
+      const map={}; songs.forEach(s=>{ const key=s.movie.ta; if(!map[key]) map[key]=[]; map[key].push(s); });
+      renderList('Movies',map);
+    }
+    function showMusicList(){
+      const map={}; songs.forEach(s=>{ const key=s.music.ta; if(!map[key]) map[key]=[]; map[key].push(s); });
+      renderList('Music Directors',map);
+    }
+    function showYearList(){
+      const map={}; songs.forEach(s=>{ const key=s.year; if(!map[key]) map[key]=[]; map[key].push(s); });
+      renderList('Years',map);
+    }
+    function showPopularList(){
+      const map={'Popular Songs':getPopular()};
+      renderList('Popular',map);
+    }
+    function renderList(title,map){
+      show(listView);
+      listTitle.textContent=title;
+      listContent.innerHTML='';
+      currentList=map;
+      Object.keys(map).sort().forEach(key=>{
+        const item=document.createElement('div');
+        item.className='list-item';
+        item.innerHTML=`<h4>${key}</h4><p>${map[key].length} song(s)</p>`;
+        item.onclick=()=>showSongsUnder(key);
+        listContent.appendChild(item);
+      });
+    }
+    function showSongsUnder(key){
+      const songList=currentList[key];
+      listContent.innerHTML='';
+      listTitle.textContent=key;
+      songList.forEach(s=>{
+        const item=document.createElement('div');
+        item.className='list-item';
+        item.innerHTML=`<h4>${s.title[currentLang]}</h4><p>${s.movie[currentLang]} • ${s.singer[currentLang]}</p>`;
+        item.onclick=()=>showLyrics(s);
+        listContent.appendChild(item);
+      });
+    }
+
+    /* ---------- Lyrics View ---------- */
+    function showLyrics(song){
+      currentSong=song;
+      song.views++; // simple counter
+      show(lyricsView);
+      songImg.src=song.img;
+      document.getElementById('lyricsTitle').textContent=song.title[currentLang];
+      document.getElementById('lyricsMeta').textContent=`${song.movie[currentLang]} • ${singer(currentLang)} • ${song.music[currentLang]} • ${song.year}`;
+      meaningBox.innerHTML=`<h3>Meaning / Explanation</h3><p>${song.meaning}</p>`;
+      lyricsText.innerHTML='';
+      karaokePlayer.innerHTML='';
+      const lines=song.lyrics[currentLang].split('\n');
+      lines.forEach((line,i)=>{
+        const span=document.createElement('span');
+        span.className='karaoke-line'; span.textContent=line; span.dataset.idx=i;
+        lyricsText.appendChild(span);
+      });
+      karaokeChk.checked=false;
+      lyricsText.classList.remove('karaoke');
+      tamilBtn.classList.toggle('active',currentLang==='ta');
+      englishBtn.classList.toggle('active',currentLang==='en');
+      updateFavButton();
+      // YouTube embed
+      if(song.karaoke){
+        karaokePlayer.innerHTML=`<iframe width="100%" height="240" src="${song.karaoke}" title="YouTube karaoke" frameborder="0" allowfullscreen></iframe>`;
+      }
+      // URL hash for share
+      location.hash=`lyric/${song.id}`;
+    }
+    function singer(l){ return currentSong.singer[l]; }
+
+    /* ---------- Language ---------- */
+    tamilBtn.onclick  =()=>{ currentLang='ta'; refreshLang(); };
+    englishBtn.onclick=()=>{ currentLang='en'; refreshLang(); };
+    function refreshLang(){
+      if(currentSong) showLyrics(currentSong);
+      if(!listView.classList.contains('hidden') && currentList){
+        const key=listTitle.textContent;
+        renderList(listTitle.textContent,currentList);
+        showSongsUnder(key);
+      }
+    }
+
+    /* ---------- Karaoke Auto-Scroll ---------- */
+    karaokeChk.onchange=e=>{
+      lyricsText.classList.toggle('karaoke',e.target.checked);
+      if(e.target.checked) startKaraoke(); else stopKaraoke();
+    };
+    function startKaraoke(){
+      const lines=document.querySelectorAll('.karaoke-line');
+      let idx=0;
+      karaokeInterval=setInterval(()=>{
+        lines.forEach(l=>l.classList.remove('active'));
+        if(idx<lines.length) lines[idx].classList.add('active');
+        lines[idx].scrollIntoView({behavior:'smooth',block:'center'});
+        idx++;
+        if(idx>lines.length) idx=0;
+      },2500);
+    }
+    function stopKaraoke(){
+      clearInterval(karaokeInterval);
+      document.querySelectorAll('.karaoke-line').forEach(l=>l.classList.remove('active'));
+    }
+
+    /* ---------- Favourites ---------- */
+    function getFavs(){ return JSON.parse(localStorage.getItem('dmFav')||'[]'); }
+    function toggleFav(){
+      const favs=getFavs();
+      const idx=favs.indexOf(currentSong.id);
+      if(idx===-1) favs.push(currentSong.id); else favs.splice(idx,1);
+      localStorage.setItem('dmFav',JSON.stringify(favs));
+      updateFavButton();
+    }
+    function updateFavButton(){
+      const favs=getFavs();
+      favBtn.textContent=favs.includes(currentSong.id)?'?? Favourited':'? Favourite';
+      favBtn.classList.toggle('faved',favs.includes(currentSong.id));
+    }
+    favBtn.onclick=toggleFav;
+
+    /* ---------- Share ---------- */
+    function shareURL(){ return location.href; }
+    document.getElementById('waShare').onclick=()=>{
+      window.open(`https://wa.me/?text=${encodeURIComponent(currentSong.title[currentLang]+' - '+shareURL())}`,'_blank');
+    };
+    document.getElementById('fbShare').onclick=()=>{
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareURL())}`,'_blank');
+    };
+    document.getElementById('copyLink').onclick=()=>{
+      navigator.clipboard.writeText(shareURL()).then(()=>{
+        toast.textContent='Link copied!'; toast.classList.add('show');
+        setTimeout(()=>toast.classList.remove('show'),1800);
+      });
+    };
+
+    /* ---------- Copy Lyrics ---------- */
+    copyBtn.onclick=()=>{
+      navigator.clipboard.writeText(currentSong.lyrics[currentLang]).then(()=>{
+        toast.textContent='Lyrics copied!'; toast.classList.add('show');
+        setTimeout(()=>toast.classList.remove('show'),1800);
+      });
+    };
+
+    /* ---------- Search ---------- */
+    searchBar.addEventListener('input',()=>{
+      const term=searchBar.value.toLowerCase().trim();
+      if(!term){ show(homeView); return; }
+      const results=songs.filter(s=>
+        s.title.ta.toLowerCase().includes(term)||
+        s.title.en.toLowerCase().includes(term)||
+        s.movie.ta.toLowerCase().includes(term)||
+        s.movie.en.toLowerCase().includes(term)||
+        s.singer.ta.toLowerCase().includes(term)||
+        s.singer.en.toLowerCase().includes(term)||
+        s.music.ta.toLowerCase().includes(term)||
+        s.music.en.toLowerCase().includes(term)||
+        s.lyricist.ta.toLowerCase().includes(term)||
+        s.lyricist.en.toLowerCase().includes(term)||
+        s.year.toString().includes(term)
+      );
+      if(results.length){
+        const map={'Search Results':results};
+        renderList('Search Results',map);
+        showSongsUnder('Search Results');
+      }else{
+        renderList('Search Results',{});
+      }
+    });
+
+    /* ---------- Back Buttons ---------- */
+    listBackBtn.onclick=()=>show(homeView);
+
+    /* ---------- Theme ---------- */
+    function loadTheme(){
+      if(localStorage.getItem('theme')==='light') document.body.classList.add('light');
+    }
+    loadTheme();
+    themeBtn.onclick=()=>{
+      document.body.classList.toggle('light');
+      localStorage.setItem('theme',document.body.classList.contains('light')?'light':'dark');
+    };
+
+    /* ---------- Font ---------- */
+    let currentSize=1.05;
+    function updateFont(){
+      document.documentElement.style.setProperty('--base-fs',currentSize+'rem');
+    }
+    fontPlus.onclick =()=>{ currentSize+=0.1; updateFont(); };
+    fontMinus.onclick=()=>{ currentSize-=0.1; updateFont(); };
+
+    /* ---------- Start ---------- */
+    show(homeView);
+  </script>
+</body>
+</html>  
