@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DeepMuzix – Feel the Lyrics. Feel the Music.</title>
+  <title>DeepMuzix â€“ Feel the Lyrics. Feel the Music.</title>
   <meta name="description" content="Modern Tamil song-lyrics hub with karaoke, search, share and favourites.">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -66,7 +66,7 @@
 
   <section class="hero">
     <h1 class="tagline">Feel the Lyrics. Feel the Music.</h1>
-    <input type="search" id="searchBar" placeholder="Search song, movie, singer… (Tamil or English)" aria-label="Search">
+    <input type="search" id="searchBar" placeholder="Search song, movie, singerâ€¦ (Tamil or English)" aria-label="Search">
   </section>
 
   <!-- ==========  HOME  ========== -->
@@ -90,7 +90,7 @@
       <h2 id="lyricsTitle"></h2>
       <p id="lyricsMeta"></p>
       <div class="extra-meta" id="extraMeta"></div>
-      <div class="lang-switch"><button id="tamilBtn" class="active">?????</button><button id="englishBtn">Tanglish</button></div>
+      <div class="lang-switch"><button id="tamilBtn" class="active">?????</button><button id="englishBtn">English</button></div>
     </div>
     <pre id="lyricsText" class="tamil"></pre>
     <div class="meaning" id="meaningBox"></div>
@@ -110,7 +110,7 @@
   <div id="toast" class="toast">Copied!</div>
 
   <footer>
-    <p>© 2026 DeepMuzix – Lyrics for educational & personal use only. All credits to original creators.</p>
+    <p>Â© 2026 DeepMuzix â€“ Lyrics for educational & personal use only. All credits to original creators.</p>
     <div class="social"><span>f</span><span>t</span><span>i</span></div>
   </footer>
 
@@ -251,7 +251,7 @@ Un kural en isaiyaagum`
       songList.forEach(s=>{
         const item=document.createElement('div');
         item.className='list-item';
-        item.innerHTML=`<h4>${s.title[currentLang]}</h4><p>${s.movie[currentLang]} • ${s.singer[currentLang]}</p>`;
+        item.innerHTML=`<h4>${s.title[currentLang]}</h4><p>${s.movie[currentLang]} â€¢ ${s.singer[currentLang]}</p>`;
         item.onclick=()=>showLyrics(s);
         listContent.appendChild(item);
       });
@@ -264,7 +264,7 @@ Un kural en isaiyaagum`
       show(lyricsView);
       songImg.src=song.img;
       document.getElementById('lyricsTitle').textContent=song.title[currentLang];
-      document.getElementById('lyricsMeta').textContent=`${song.movie[currentLang]} • ${singer(currentLang)} • ${song.music[currentLang]} • ${song.year}`;
+      document.getElementById('lyricsMeta').textContent=`${song.movie[currentLang]} â€¢ ${singer(currentLang)} â€¢ ${song.music[currentLang]} â€¢ ${song.year}`;
       meaningBox.innerHTML=`<h3>Meaning / Explanation</h3><p>${song.meaning}</p>`;
       lyricsText.innerHTML='';
       karaokePlayer.innerHTML='';
@@ -411,4 +411,5 @@ Un kural en isaiyaagum`
     show(homeView);
   </script>
 </body>
+
 </html>  
