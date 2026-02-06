@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Karaoke Videos | DeepMuzix</title>
+  <meta name="description" content="Tamil karaoke videos embedded from YouTube." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+<header><div class="container nav"><strong>DeepMuzix</strong><ul><li><a href="index.html">Home</a></li><li><a href="lyrics.html">Lyrics</a></li><li><a href="karaoke.html">Karaoke</a></li><li><a href="artists.html">Artists</a></li></ul></div></header>
+<main class="container"><h1>Karaoke Videos</h1><div id="karaokeGrid" class="grid"></div></main>
+<footer class="container"><p><a href="privacy.html">Privacy Policy</a> • <a href="dmca.html">DMCA</a></p></footer>
+<script>
+fetch('./data/songs.json').then(r=>r.json()).then(songs=>{
+  document.querySelector('#karaokeGrid').innerHTML = songs.map(song => `
+    <article class="card"><iframe loading="lazy" src="https://www.youtube.com/embed/${song.youtubeKaraokeId}" title="${song.title} karaoke"></iframe><div class="card-content"><h3><a href="song.html?slug=${song.slug}">${song.title}</a></h3></div></article>`).join('');
+});
+</script>
+</body>
+</html>

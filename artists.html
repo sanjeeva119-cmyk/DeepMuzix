@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Artists | DeepMuzix</title>
+  <meta name="description" content="Browse singers and music directors in the DeepMuzix Tamil lyrics catalog." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+<header><div class="container nav"><strong>DeepMuzix</strong><ul><li><a href="index.html">Home</a></li><li><a href="lyrics.html">Lyrics</a></li><li><a href="karaoke.html">Karaoke</a></li><li><a href="artists.html">Artists</a></li></ul></div></header>
+<main class="container"><h1>Artists</h1><div id="artistGrid" class="grid"></div></main>
+<footer class="container"><p><a href="privacy.html">Privacy Policy</a> • <a href="dmca.html">DMCA</a></p></footer>
+<script>
+fetch('./data/songs.json').then(r=>r.json()).then(songs=>{
+  const map = new Map();
+  songs.forEach(song => {
+    song.singers.forEach(singer => {
+      if (!map.has(singer)) map.set(singer, {count:0, songs:[]});
+      map.get(singer).count += 1;
+      map.get(singer).songs.push(song.title);
+    });
+  });
+  document.querySelector('#artistGrid').innerHTML = [...map.entries()].map(([name, info]) => `
+    <article class="card"><div class="card-content"><h3>${name}</h3><p class="meta">Songs: ${info.count}</p><p>${info.songs.slice(0,3).join(', ')}</p></div></article>`).join('');
+});
+</script>
+</body>
+</html>
